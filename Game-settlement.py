@@ -23,11 +23,12 @@ def hit(noun):
         object = GameObjects.objects[noun]
         if type(object)==Goblin or Wolf:
             object.hp-=1
+            msg = ("your blade takes a tour to the nearest {}s' body".format(noun))
             if object.hp<=0:
-                print("You have viciously murdered a {} type(object)".format(type(object)))
-        else:
-            print("{} got a slap from you".format(type(object)))
-
+                msg+=("\nYou have viciously murdered a {}".format(noun))
+    else:
+        msg = "Poor {} just got a slap from you".format(noun)
+    return msg
 dicti = {"say": say, "examine":examine, "hit":hit}
 class GameObjects:
   class_name = ""
@@ -43,24 +44,45 @@ class Goblin(GameObjects):
   def __init__(self,name):
     self.hp=3
     self.class_name = "goblin"
-    self.description = "A foul creature"
-    super.__init__(self)
+    self._description = "(A foul creature) \n"
+    super().__init__(name)
   @property
-  def health(self):
+  def description(self):
       if self.hp>=3:
-          return self.description, "it is fine"
+          return self._description + "It is fine"
       if self.hp==2:
-          return self.description, "It is wounded"
+          return self._description + "It is wounded"
       if self.hp==1:
-          return self.description, "It is heavily injured"
+          return self._description + "It is heavily injured"
       if self.hp==0:
-          return self.description, "It is at death's door"
-
+          return self._description + "It is at death's door"
+      if self.hp < 0:
+          return self._description + "It is dead as death"
+  @description.setter
+  def description(self,value):
+     self._description=value
 class Wolf(GameObjects):
-  class_name = "wolf"
-  description = "Wolves hunt in packs!"
-goblin = Goblin(input("What's this goblins name? "))
-wolf=Wolf(input("Guess this wolf is nameless,  how would you prefer to refer to it?" ))
-
+   def __init__(self,name):
+      self.hp=2
+      self.class_name = "wolf"
+      self.description = "(Wolves hunt in packs!) \n"
+      super().__init__(name)
+   @property
+   def description(self):
+       if self.hp >= 2:
+           return self._description + "It is gazing on you with a bit of hope"
+       if self.hp == 1:
+           return self._description + "It is heavily injured"
+       if self.hp == 0:
+           return self._description + "It is at death's door, you are a monster"
+       if self.hp < 0:
+           return self._description + "It is dead as death"
+   @description.setter
+   def description(self, value):
+       self._description = value
+print("Attention! You are entering textRPG zone and now are hitting the point of no return. Use say/examine/hit [word] commands to venture through \n\n")
+print("You wake up in a bed among the ruins. A goblin hunter with his faithful wolf companion are starring at you silently \n My name is Jakem,- the goblin says unsurely ")
+goblin = Goblin("Jakem")
+wolf=Wolf(input("Guess this wolf is nameless.. How would you prefer to refer to it? " ))
 while True:
   get_input()
