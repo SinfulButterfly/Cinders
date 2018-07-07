@@ -181,4 +181,5 @@ HeroRace=input("What's your race? \n")
 Hero=Self(HeroName,HeroRace)
 while True:
   get_input()
-  # ToDo: Learn about graph interface for this rpg, add some more creatures, add "hit trading algorithm", finish names to usage
+  # ToDo: Learn about graph interface for this rpg, add some more creatures, add "hit trading algorithm", add heal/damage power, add mana (maybe, stamina too)
+  # ToDo: Think about that or any other unusual concept for a game
