@@ -1,11 +1,24 @@
+import GameStats
 import re
-
 #ToDo: make an email extraction code
 
+verdict="madness" if 2+2!=4 else "reality"
+for i in range(9):
+    print(i)
+else:
+    print("unbroken")
+for k in range(5):
+    try:
+        k/9
+    except ZeroDivisionError:
+        print(k)
+    else:
+        print("no mistakes")
+print(verdict)
 btry=r"\b(cat)\b"
 match = re.search(btry, "The!cat!sat!")
 if match:
-   print ("Match sequence")
+    print ("Match sequence")
 sequence=r"(double )\1(trouble)"
 matchseq = re.match(sequence,"double double trouble")
 if matchseq:
@@ -33,6 +46,16 @@ if re.search(dontShout,input("quiet,pls\n")):
     print("I SAID QUIET!!!!")
 print(re.sub("pattern","python",pattern))
 print(string)
+mail = input("Please, enter your e-mail \n")
+mailPattern=r"([\w]+)(@mail.)([\w]+)"
+iterator=re.match(mail,mailPattern)
+while not iterator:
+    print("Incorrect e-mail form")
+    mail = input("Please, reenter your e-mail \n")
+    if iterator:
+        print("trying to break")
+        break
+print("Thanks for submitting")
 # * = 0 or more repetitions
 # + = 1 or more repetitions
 # ? = 1 or less repetitions
