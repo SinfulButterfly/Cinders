@@ -1,3 +1,5 @@
+import math
+
 def get_input():
     inpt = input("> ").split()
     word = inpt[0]
@@ -16,14 +18,34 @@ def say(noun):
     return 'You said "{}"'.format(noun)
 
 def talk(noun):
-    return 'You invite {} to a conversation'.format(noun)    # ToDo: enhance
+    msg = 'You invite {} to a conversation\n'.format(noun)    # ToDo: enhance - Started to
+    if noun in (*GameObjects.objects,"self",hero_race,hero_name):
+        if noun not in ("self",hero_race,hero_name):
+            obj = GameObjects.objects[noun]
+            if obj.relations >= 3:
+                if obj.status != "talked":
+                    msg += "You succeed and spend a few minutes chit-chating with {}\n".format(obj.class_name)
+                    obj.relations += 0.5
+                    obj.status = "talked"
+                else:
+                    msg += "you have already talk with this {}\n".format(obj.class_name)
+            else:
+                msg += "{} is not going to talk with anything but weapons\n".format(obj.class_name)
+        else:
+            msg += "Conversing with self is not as strange as it may seem from afar\n"
+    else:
+        msg += "{} doesn't seem to be interested in your words\n".format(noun)
+    return msg
 
 def examine(noun):
     if noun in GameObjects.objects or noun == "self" or noun == hero_name:
         if noun != "self" and noun != hero_name:
             obj = GameObjects.objects[noun]
-        else: obj = GameObjects.objects[hero_race]
-        return obj.comments + "{} {} has {} Hp left \n".format(obj.class_name, obj.name, obj.hp) + obj.description
+            msg = obj.comments + "Reputation: {}\n".format(relations[math.floor(obj.relations)])
+        else:
+            obj = GameObjects.objects[hero_race]
+            msg = obj.comments
+        return msg + "{} {} has {} Hp left \n".format(obj.class_name, obj.name, obj.hp) + obj.description
     else:
         return "There is no {} here.".format(noun)
 
@@ -32,22 +54,25 @@ def hit(noun):
         if noun != "self" and noun != hero_name and noun != hero_race:
             game_object = GameObjects.objects[noun]
             if game_object.hp >= 0:
-                game_object.hp -= hero.attack_power                                                      # attack power
+                game_object.hp -= hero.attack_power
+                if game_object.relations >= 1:
+                    game_object.relations -= 1
                 msg = "your blade takes a tour to the nearest {}s' body \n".format(noun)
-                #if attitude == "suspicious" or "hatred":
                 if game_object.hp > 0:
-                    hero.hp -= game_object.attack_power
-                    msg += "{} has riposted your attack for {} damage\n " \
-                           "{} but now ".format(game_object.class_name, game_object.attack_power, hero.description)
-                    if hero.hp < 0:
-                        msg += "\n {} Has lend a killing blow upon you \n"
-                        if input("restart? ")=="yes":
-                            print("Sorry, im still unsure about adding this option")
-                        raise ValueError("You cannot be that dead. \n\n\n Game over")
+                    if game_object.relations < 2:
+                        hero.hp -= game_object.attack_power/(game_object.relations+1)
+                        msg += "The {} was {} and has riposted your attack for " \
+                               "{} damage\n{} but now ".format(game_object.class_name, relations[math.floor(game_object.relations)],
+                                                               game_object.attack_power, hero.description)
+                        if hero.hp < 0:
+                            msg += "\n {} Has lend a killing blow upon you \n"
+                            if input("restart? ") == "yes":
+                                print("Sorry, im still unsure about adding this option")
+                            raise ValueError("You cannot be that dead. \n\n\n Game over")
                 if game_object.hp < 0:
                     msg += "\nYou have viciously murdered a {}\n".format(noun)
-            else: msg = "stop hitting corpses for hells sakes \n"
-
+            else:
+                msg = "stop hitting corpses for hells sakes \n"
         else:
             game_object = GameObjects.objects[hero_race]
             msg = "Your blade sinks under your skin \n"
@@ -74,7 +99,7 @@ def heal(noun):
             elif game_object.hp < 1:
                 if game_object.hp >= 0:
                     game_object.hp += 0.1
-                    msg += ("{} is at death's door."
+                    msg += ("{} is at death's door. "
                             "Healing of such injuries may require some stronger spells\n".format(noun))
             if game_object.hp < 0:
                 msg += ("{} is dead. Seeing it healed would be a miracle\n".format(noun))
@@ -93,7 +118,7 @@ def heal(noun):
 
 
 dictionary = {"say": say, "examine": examine, "hit": hit, "heal": heal, "talk":talk}
-relations = {5:"love", 4:"friendship", 3:"neutral", 2:"suspicious", 1:"hostility", 0:"hatred"}
+relations = {5:"in love", 4:"friend", 3:"neutral", 2:"suspicious", 1:"hostile", 0:"hatred-fueled"}
 
 
 class GameObjects:
@@ -141,7 +166,8 @@ class Self(GameObjects):
 
 class Goblin(GameObjects):
     def __init__(self, name=""):
-        self.relations = relations[3]
+        self.relations = 3
+        self.status = ""
         self.default_hp = 3
         self.attack_power = 3
         self.heal_power = 1
@@ -170,7 +196,8 @@ class Goblin(GameObjects):
 
 class Wolf(GameObjects):
     def __init__(self, name=""):
-        self.relations = relations[3]
+        self.relations = 3
+        self.status = ""
         self.default_hp = 2
         self.attack_power = 2
         self.heal_power = 0
@@ -197,7 +224,8 @@ class Wolf(GameObjects):
 
 class Harpy(GameObjects):
     def __init__(self, name=""):
-        self.relations = relations[2]
+        self.relations = 2
+        self.status = ""
         self.default_hp = 5
         self.attack_power = 2
         self.heal_power = 3
@@ -242,16 +270,18 @@ if __name__ == "__main__":
     hero = Self(hero_name, hero_race)
     while True:
         get_input()
-    # ToDo: (task pinned forever) Add some more creatures  and interactions         Gameplay
-    # ToDo: Add "hit trading algorithm" DONE;  Base it on relations                 Combat          Work in progress
-    # ToDo: Think whether to fix or leave the over-heal and over-hit effects        Combat
-    # ToDo: Add resources: manna (maybe, stamina too)                               Combat
-    # ToDo: Think of multiple target-based combat                                   Combat
-    # ToDo: Add friend-or-foe system and reputations                                Gameplay        Work in progress
-    # ToDo: think of finish-him system                                              Combat and gameplay
-    # ToDo: Invent evasion, armor for damage-reducing or -absorption, dodge-text    Combat
-    # ToDo: Blender                                                                 Graphics        Learning
-    # ToDo: godot, Unreal Engine 4, Unity, Learn about graph interface for our rpg  Engine          Paused
-    # ToDo: Think about that L idea or any other unusual concept for a game         Gameplay
-        # constants (variables that never change value) should be CAPS_WITH_UNDERSCORES;
-        # For 3D games, the library Panda3D can be used. For 2D games, you can use pygame.
+
+
+# ToDo: (task pinned forever) Add some more creatures  and interactions         Gameplay        Coming soon
+# ToDo: Add hit trading algorithm; Base it on relations; Should I add healing?  Combat          Finishing
+# ToDo: Think whether to fix or leave the over-heal and over-hit effects        Combat          Easy to fix. but I won't
+# ToDo: Add resources: manna (maybe, stamina too)                               Combat          Coming soon
+# ToDo: Think of multiple target-based combat                                   Combat          HellNO!! (will try l8tr)
+# ToDo: Add friend-or-foe system and reputations                                Gameplay        Finishing
+# ToDo: think of finish-him system                                              Combat and gameplay (I will)
+# ToDo: Invent evasion, armor for damage-reducing or -absorption, dodge-text    Combat          Queued
+# ToDo: Blender. Beginning to love it (a lot)                                   Graphics        Learning, Trying out.
+# ToDo: godot, Unity, Unreal Engine 4                                           Engine          Trying to get to UE4
+# ToDo: Think about that L idea or any other unusual concept for a game         Gameplay        Will.
+    # PEP8 reminder: constants (variables that never change value) should be CAPS_WITH_UNDERSCORES; <- Heed it well!
+    # just in case: For 3D games, the library Panda3D can be used. For 2D games, you can use pygame.
